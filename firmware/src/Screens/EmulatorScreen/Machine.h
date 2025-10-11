@@ -1,5 +1,6 @@
 #pragma once
 
+#include "log.h"
 #include "stdio.h"
 #include <functional>
 #include <list>
@@ -57,12 +58,12 @@ public:
     for (int i = 0; i < 240; i++) {
       MemoryBank *memoryBank = new MemoryBank();
       if (!memoryBank) {
-        Serial.println("Could not allocate memory bank");
+        LOG_E("Could not allocate memory bank");
         return;
       }
       memoryBank->data = (uint8_t *) ps_malloc(0x4000);
       if (!memoryBank->data) {
-        Serial.println("Could not allocate memory bank data");
+        LOG_E("Could not allocate memory bank data");
         return;
       }
       memoryBanks.push_back(memoryBank);
@@ -81,7 +82,7 @@ public:
       }
     }
     ensureMemoryBanks(memoryBankCount);
-    Serial.printf("Saving %d memory banks\n", memoryBankCount);
+    LOG_D("Saving %d memory banks", memoryBankCount);
     // create a new time travel instant
     TimeTravelInstant *instant = new TimeTravelInstant();
     // copy the memory banks
@@ -112,7 +113,7 @@ public:
       }
       delete oldestInstant;
     }
-    Serial.printf("Recorded time travel instant %d\n", timeTravelInstants.size());
+    LOG_D("Recorded time travel instant %d", timeTravelInstants.size());
     return true;
   }
   // rewind the machine to a previous state
@@ -180,14 +181,14 @@ class Machine {
       // record the current state
       timeTravel->record(machine);
       timeTravelPosition = timeTravel->size() - 1;
-      Serial.printf("Starting time travel %d\n", timeTravelPosition);
+      LOG_D("Starting time travel %d", timeTravelPosition);
     }
     void stepBack() {
       if (timeTravelPosition > 0) {
         timeTravelPosition--;
         timeTravel->rewind(machine, timeTravelPosition);
         renderer->forceRedraw(machine->mem.currentScreen->data, machine->borderColors);
-        Serial.printf("Time travel %d\n", timeTravelPosition);
+        LOG_D("Time travel %d", timeTravelPosition);
       }
     }
     void stepForward() {
@@ -195,7 +196,7 @@ class Machine {
         timeTravelPosition++;
         timeTravel->rewind(machine, timeTravelPosition);
         renderer->forceRedraw(machine->mem.currentScreen->data, machine->borderColors);
-        Serial.printf("Time travel %d\n", timeTravelPosition);
+        LOG_D("Time travel %d", timeTravelPosition);
       }
     }
     void stopTimeTravel() {

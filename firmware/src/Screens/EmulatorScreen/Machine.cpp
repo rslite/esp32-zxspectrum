@@ -23,13 +23,13 @@ void Machine::runEmulator() {
         lastTime = currentTime;
         float cycles = cycleCount / (elapsed * 1000.0);
         float fps = renderer->getFrameCount() / (elapsed / 1000.0);
-        Serial.printf("Executed at %.3FMHz cycles, frame rate=%.2f\n", cycles, fps);
+        LOG_V("Executed at %.3FMHz cycles, frame rate=%.2f", cycles, fps);
         renderer->resetFrameCount();
         cycleCount = 0;
         // save the state of the machine for time travel
         timeTravel->record(machine);
-        Serial.printf("Free heap: %d\n", ESP.getFreeHeap());
-        Serial.printf("Free PSRAM: %d\n", ESP.getFreePsram());
+        LOG_I("Free heap: %d", ESP.getFreeHeap());
+        LOG_D("Free PSRAM: %d", ESP.getFreePsram());
       }
       if (machine->romLoadingRoutineHit)
       {
@@ -46,7 +46,7 @@ void Machine::runEmulator() {
 
 Machine::Machine(Renderer *renderer, AudioOutput *audioOutput, std::function<void()> romLoadingRoutineHitCallback)
 : renderer(renderer), audioOutput(audioOutput), romLoadingRoutineHitCallback(romLoadingRoutineHitCallback) {
-  Serial.println("Creating machine");
+  LOG_I("Creating machine");
   machine = new ZXSpectrum();
   timeTravel = new TimeTravel();
 }
@@ -58,14 +58,14 @@ void Machine::updateKey(SpecKeys key, uint8_t state) {
 }
 
 void Machine::setup(models_enum model) {
-  Serial.println("Setting up machine");
+  LOG_I("Setting up machine");
   machine->reset();
   machine->init_spectrum(model);
   machine->reset_spectrum(machine->z80Regs);
 }
 
 void Machine::start(FILE *audioFile) {
-  Serial.println("Starting machine");
+  LOG_I("Starting machine");
   this->audioFile = audioFile;
   isRunning = true;
   xTaskCreatePinnedToCore(runnerTask, "z80Runner", 8192, this, 5, NULL, 0);

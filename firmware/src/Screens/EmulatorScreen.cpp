@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "../log.h"
 #include "../TFT/TFTDisplay.h"
 #include "../Emulator/spectrum.h"
 #include "../Emulator/snaps.h"
@@ -61,7 +62,7 @@ EmulatorScreen::EmulatorScreen(Display &tft, HDMIDisplay *hdmiDisplay, AudioOutp
   renderer = new Renderer(tft, audioOutput, hdmiDisplay);
   machine = new Machine(renderer, audioOutput, [&]()
                         {
-    Serial.println("ROM loading routine hit");
+    LOG_I("ROM loading routine hit");
     triggerLoadTape(); });
   gameLoader = new GameLoader(machine, renderer, audioOutput);
 }
