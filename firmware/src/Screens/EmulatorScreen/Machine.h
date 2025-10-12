@@ -7,6 +7,7 @@
 #include <vector>
 #include <deque>
 #include "Renderer.h"
+#include "../../Debugger/DebuggerData.h"
 #include "../../Emulator/spectrum.h"
 #include "../../Serial.h"
 
@@ -147,8 +148,16 @@ class Machine {
   private:
     // the actual machine
     ZXSpectrum *machine = nullptr;
+  public:
     // are we currently running?
     bool isRunning = false;
+    // is the debugger connected
+    bool debuggerConnected = false;
+    // pause reason (manual break, breakpoint, ...)
+    uint8_t pauseReason = PAUSE_NOT_SET;
+    // data for debugging (breakpoints, watchpoints, other stuff)
+    DebuggerData debuggerData;
+  private:
     // the renderer - we trigger a redraw every frame
     Renderer *renderer = nullptr;
     // where are we sending audio?

@@ -1,6 +1,7 @@
 #include "./Machine.h"
 #include "./Renderer.h"
 #include "../../AudioOutput/AudioOutput.h"
+#include "../../FileLog.h"
 
 void runnerTask(void *pvParameter)
 {
@@ -9,6 +10,7 @@ void runnerTask(void *pvParameter)
 }
 
 void Machine::runEmulator() {
+  FileLog fl;
   unsigned long lastTime = millis();
   while (1)
   {
@@ -16,6 +18,17 @@ void Machine::runEmulator() {
     {
       cycleCount += machine->runForFrame(audioOutput, audioFile);
       renderer->triggerDraw(machine->mem.currentScreen->data, machine->borderColors);
+      if (debuggerConnected){
+        if (machine->z80Regs->bkp_stop){
+          machine->z80Regs->bkp_stop = false;
+          uint16_t pc = machine->z80Regs->PC.W;
+          isRunning = false;
+          pauseReason = PAUSE_NO_REASON;
+          // Clear the temp breakpoints
+          debuggerData.clearTempBreakpoints();
+          fl.log("BP hit at :%04X", pc);
+        }
+      }
       unsigned long currentTime = millis();
       unsigned long elapsed = currentTime - lastTime;
       if (elapsed > 1000)
@@ -35,6 +48,8 @@ void Machine::runEmulator() {
       {
         romLoadingRoutineHitCallback();
       }
+      // Allow other tasks to interrupt 
+      vTaskDelay(0);
     }
     else
     {
@@ -68,6 +83,9 @@ void Machine::start(FILE *audioFile) {
   LOG_I("Starting machine");
   this->audioFile = audioFile;
   isRunning = true;
+  if (debuggerConnected){
+    machine->z80Regs->debugging = true;
+  }
   xTaskCreatePinnedToCore(runnerTask, "z80Runner", 8192, this, 5, NULL, 0);
 }
 

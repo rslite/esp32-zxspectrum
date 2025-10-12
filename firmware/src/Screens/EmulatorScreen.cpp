@@ -65,6 +65,10 @@ EmulatorScreen::EmulatorScreen(Display &tft, HDMIDisplay *hdmiDisplay, AudioOutp
     LOG_I("ROM loading routine hit");
     triggerLoadTape(); });
   gameLoader = new GameLoader(machine, renderer, audioOutput);
+  // Save the machine objects for debugger easy access
+  Config& cfg = Config::getConfig();
+  cfg.machine = machine;
+  cfg.speccy = machine->getMachine();
 }
 
 void EmulatorScreen::run(std::string filename, models_enum model)

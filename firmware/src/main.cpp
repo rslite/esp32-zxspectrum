@@ -19,6 +19,7 @@
 #include <vector>
 #include <sstream>
 #include "SPI.h"
+#include "Config.h"
 #include "AudioOutput/I2SOutput.h"
 #include "AudioOutput/PDMOutput.h"
 #include "AudioOutput/DACOutput.h"
@@ -245,6 +246,13 @@ void setup(void)
   );
 
   LOG_I("Running on core: %d", xPortGetCoreID());
+
+  // Save important variables into config
+  Config& cfg = Config::getConfig();
+  cfg.sdfiles = (IFiles*)sdFiles;
+  cfg.navigationStack = navigationStack;
+  cfg.packetHandler = packetHandler;
+
   // use the boot pin to open the emulator menu
   pinMode(0, INPUT_PULLUP);
   // just keep running
